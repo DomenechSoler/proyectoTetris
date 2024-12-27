@@ -25,6 +25,12 @@ export default function TablaPartidas() {
 
     const [ordenAscendente, setOrdenAscendente] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+    const [nuevaPartida, setNuevaPartida] = useState({
+        avatar: "",
+        nick: "",
+        puntos: "",
+        fecha: ""
+    });
 
     const ordenarPorNick = () => {
         const ordenado = [...partidas].sort((a, b) => {
@@ -54,6 +60,20 @@ export default function TablaPartidas() {
         setOrdenAscendente(!ordenAscendente);
     };
 
+    const DatosNuevos = (e) => {
+        const { name, value } = e.target;
+        setNuevaPartida({ ...nuevaPartida, [name]: value });
+    };
+    const AñadirArray = () => {
+        if (!nuevaPartida.nick || !nuevaPartida.puntos || !nuevaPartida.fecha) {
+            alert("Por favor, completa todos los campos");
+            return;
+        }
+        setPartidas([...partidas, { ...nuevaPartida, puntos: parseInt(nuevaPartida.puntos) }]);
+        setModalVisible(false);
+        setNuevaPartida({ avatar: "", nick: "", puntos: "", fecha: "" });
+    };
+
     return (
         <div className="container text-center d-flex flex-column justify-content-center align-items-center"> 
             <h2 className="text-center text-light">Partidas</h2>
@@ -79,56 +99,57 @@ export default function TablaPartidas() {
             </div>
 
             <div className="container">
-            <table className="table table-dark text-center">
-                <thead className="w-100">
-                    <tr>
-                        <th></th>
-                        <th>Nick <i className="bi bi-arrow-up-square" onClick={ordenarPorNick}></i></th>
-                        <th>Puntuación <i className="bi bi-arrow-up-square" onClick={ordenarPorPuntos}></i></th>
-                        <th>Fecha <i className="bi bi-arrow-up-square" onClick={ordenarPorFecha}></i></th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoTabla">
-                    {partidas.map((partida) => (
-                        <tr key={partida.nick}>
-                            <td><img width="50" height="50" src={partida.avatar} alt="avatar" /></td>
-                            <td>{partida.nick}</td>
-                            <td>{partida.puntos}</td>
-                            <td>{partida.fecha}</td>
+                <table className="table table-dark text-center">
+                    <thead className="w-100">
+                        <tr>
+                            <th></th>
+                            <th>Nick <i className="bi bi-arrow-up-square" onClick={ordenarPorNick}></i></th>
+                            <th>Puntuación <i className="bi bi-arrow-up-square" onClick={ordenarPorPuntos}></i></th>
+                            <th>Fecha <i className="bi bi-arrow-up-square" onClick={ordenarPorFecha}></i></th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="cuerpoTabla">
+                        {partidas.map((partida) => (
+                            <tr key={partida.nick}>
+                                <td><img width="50" height="50" src={partida.avatar} alt="avatar" /></td>
+                                <td>{partida.nick}</td>
+                                <td>{partida.puntos}</td>
+                                <td>{partida.fecha}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
 
-            
+
             {/* Modal */}
             {modalVisible && (
-                <div className="modal" style={{ display: 'block' }}>
+                <div className="modal-partidas">
                     <div className="modal-content">
                         <h2 className="text-dark">Agregar nueva partida</h2>
                         <form>
                             <label>
                                 <p className="text-dark">Avatar URL:</p>
-                                <input type="text" name="avatar" placeholder="URL del avatar" />
+                                <input type="text" name="avatar" value={nuevaPartida.avatar} onChange={DatosNuevos} placeholder="URL del avatar" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Nick:</p>
-                                <input type="text" name="nick" placeholder="Nombre del jugador" />
+                                <input type="text" name="nick" value={nuevaPartida.nick} onChange={DatosNuevos} placeholder="Nombre del jugador" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Puntos:</p>
-                                <input type="number" name="puntos" placeholder="Puntos" />
+                                <input type="number" name="puntos" value={nuevaPartida.puntos} onChange={DatosNuevos} placeholder="Puntos" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Fecha (dd-mm-yyyy):</p>
-                                <input type="text" name="fecha" placeholder="Fecha de la partida" />
+                                <input type="text" name="fecha" value={nuevaPartida.fecha} onChange={DatosNuevos} placeholder="Fecha de la partida" />
                             </label>
                         </form>
-                        <button onClick={() => setModalVisible(false)}>Cerrar</button>
+                        <button className="btn btn-primary mt-3 me-2" onClick={AñadirArray}>Guardar</button>
+                        <button className="btn btn-secondary mt-3" onClick={() => setModalVisible(false)}>Cerrar</button>
                     </div>
                 </div>
             )}
