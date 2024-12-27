@@ -1,6 +1,7 @@
 import { useState } from "react";
+import "../App.css";
 
-export default function TablaPartidas(){
+export default function TablaPartidas() {
     const [partidas, setPartidas] = useState([
         {
             avatar: "https://www.svgrepo.com/show/384669/account-avatar-profile-user-13.svg",
@@ -23,6 +24,7 @@ export default function TablaPartidas(){
     ]);
 
     const [ordenAscendente, setOrdenAscendente] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
 
     const ordenarPorNick = () => {
         const ordenado = [...partidas].sort((a, b) => {
@@ -47,14 +49,18 @@ export default function TablaPartidas(){
             const fechaA = new Date(a.fecha.split("-").reverse().join("-"));
             const fechaB = new Date(b.fecha.split("-").reverse().join("-"));
             return ordenAscendente ? fechaA - fechaB : fechaB - fechaA;
-    });
+        });
         setPartidas(ordenado);
         setOrdenAscendente(!ordenAscendente);
     };
 
-    return( 
-    <div>
-        <h2 className="text-center text-light">Partidas</h2>
+    return (
+        <div className="container text-center d-flex flex-column justify-content-center align-items-center"> 
+            <h2 className="text-center text-light">Partidas</h2>
+            <button className="btn btn-outline-secondary mb-3 rounded-3" onClick={() => setModalVisible(true)}>
+                <h4 className="text-white">Agregar nueva partida</h4>
+            </button>
+
             <div className="input-group mb-3">
                 <input
                     type="text"
@@ -71,28 +77,61 @@ export default function TablaPartidas(){
                     <i className="bi bi-x-lg"></i>
                 </button>
             </div>
-            <table className="table table-dark">
+
+            <div className="container">
+            <table className="table table-dark text-center">
                 <thead className="w-100">
                     <tr>
                         <th></th>
-                        <th >Nick <i className="bi bi-arrow-up-square" onClick={ordenarPorNick}></i></th>
-                        <th >Puntuación <i className="bi bi-arrow-up-square" onClick={ordenarPorPuntos}></i></th>
-                        <th >Fecha <i className="bi bi-arrow-up-square" onClick={ordenarPorFecha}></i></th>
+                        <th>Nick <i className="bi bi-arrow-up-square" onClick={ordenarPorNick}></i></th>
+                        <th>Puntuación <i className="bi bi-arrow-up-square" onClick={ordenarPorPuntos}></i></th>
+                        <th>Fecha <i className="bi bi-arrow-up-square" onClick={ordenarPorFecha}></i></th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoTabla">
-                {partidas.map((partida)=>(
-                    <tr key={partida.nick}>
-                        <td><img width="50" height="50" src={partida.avatar} alt="avatar" /></td>
-                        <td>{partida.nick}</td>
-                        <td>{partida.puntos}</td>
-                        <td>{partida.fecha}</td>
-                    </tr>
-                ))}
+                    {partidas.map((partida) => (
+                        <tr key={partida.nick}>
+                            <td><img width="50" height="50" src={partida.avatar} alt="avatar" /></td>
+                            <td>{partida.nick}</td>
+                            <td>{partida.puntos}</td>
+                            <td>{partida.fecha}</td>
+                        </tr>
+                    ))}
                 </tbody>
-                <tfoot></tfoot>
             </table>
-    </div>
-)
+            </div>
 
+            
+            {/* Modal */}
+            {modalVisible && (
+                <div className="modal" style={{ display: 'block' }}>
+                    <div className="modal-content">
+                        <h2 className="text-dark">Agregar nueva partida</h2>
+                        <form>
+                            <label>
+                                <p className="text-dark">Avatar URL:</p>
+                                <input type="text" name="avatar" placeholder="URL del avatar" />
+                            </label>
+                            <br />
+                            <label>
+                                <p className="text-dark mt-4">Nick:</p>
+                                <input type="text" name="nick" placeholder="Nombre del jugador" />
+                            </label>
+                            <br />
+                            <label>
+                                <p className="text-dark mt-4">Puntos:</p>
+                                <input type="number" name="puntos" placeholder="Puntos" />
+                            </label>
+                            <br />
+                            <label>
+                                <p className="text-dark mt-4">Fecha (dd-mm-yyyy):</p>
+                                <input type="text" name="fecha" placeholder="Fecha de la partida" />
+                            </label>
+                        </form>
+                        <button onClick={() => setModalVisible(false)}>Cerrar</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
