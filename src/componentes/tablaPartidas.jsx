@@ -25,6 +25,12 @@ export default function TablaPartidas() {
 
     const [ordenAscendente, setOrdenAscendente] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
+        const [nuevaPartida, setNuevaPartida] = useState({
+        avatar: "",
+        nick: "",
+        puntos: "",
+        fecha: ""
+    });
 
     const ordenarPorNick = () => {
         const ordenado = [...partidas].sort((a, b) => {
@@ -52,6 +58,20 @@ export default function TablaPartidas() {
         });
         setPartidas(ordenado);
         setOrdenAscendente(!ordenAscendente);
+    };
+
+    const DatosNuevos = (e) => {
+        const { name, value } = e.target;
+        setNuevaPartida({ ...nuevaPartida, [name]: value });
+    };
+    const AñadirArray = () => {
+        if (!nuevaPartida.nick || !nuevaPartida.puntos || !nuevaPartida.fecha) {
+            alert("Por favor, completa todos los campos");
+            return;
+        }
+        setPartidas([...partidas, { ...nuevaPartida, puntos: parseInt(nuevaPartida.puntos) }]);
+        setModalVisible(false);
+        setNuevaPartida({ avatar: "", nick: "", puntos: "", fecha: "" });
     };
 
     return (
@@ -101,7 +121,7 @@ export default function TablaPartidas() {
             </table>
             </div>
 
-            
+
             {/* Modal */}
             {modalVisible && (
                 <div className="modal" style={{ display: 'block' }}>
@@ -110,25 +130,26 @@ export default function TablaPartidas() {
                         <form>
                             <label>
                                 <p className="text-dark">Avatar URL:</p>
-                                <input type="text" name="avatar" placeholder="URL del avatar" />
+                                <input type="text" name="avatar" value={nuevaPartida.avatar} onChange={DatosNuevos} placeholder="URL del avatar" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Nick:</p>
-                                <input type="text" name="nick" placeholder="Nombre del jugador" />
+                                <input type="text" name="nick" value={nuevaPartida.nick} onChange={DatosNuevos} placeholder="Nombre del jugador" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Puntos:</p>
-                                <input type="number" name="puntos" placeholder="Puntos" />
+                                <input type="number" name="puntos" value={nuevaPartida.puntos} onChange={DatosNuevos} placeholder="Puntos" />
                             </label>
                             <br />
                             <label>
                                 <p className="text-dark mt-4">Fecha (dd-mm-yyyy):</p>
-                                <input type="text" name="fecha" placeholder="Fecha de la partida" />
+                                <input type="text" name="fecha" value={nuevaPartida.fecha} onChange={DatosNuevos} placeholder="Fecha de la partida" />
                             </label>
                         </form>
-                        <button onClick={() => setModalVisible(false)}>Cerrar</button>
+                        <button className="btn btn-primary mt-3 me-2" onClick={AñadirArray}>Guardar</button>
+                        <button className="btn btn-secondary mt-3" onClick={() => setModalVisible(false)}>Cerrar</button>
                     </div>
                 </div>
             )}
