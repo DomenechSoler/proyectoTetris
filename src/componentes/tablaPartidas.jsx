@@ -74,6 +74,7 @@ export default function TablaPartidas() {
         setNuevaPartida({ avatar: "", nick: "", puntos: "", fecha: "" });
     };
 
+
     return (
         <div className="container text-center d-flex flex-column justify-content-center align-items-center"> 
             <h2 className="text-center text-light">Partidas</h2>
@@ -120,6 +121,7 @@ export default function TablaPartidas() {
                     </tbody>
                 </table>
             </div>
+
 
 
             {/* Modal */}
