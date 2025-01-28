@@ -26,3 +26,29 @@
   width: 40px;
   border: 1px white solid;
 }
+
+
+
+
+#panel {
+  display: grid;
+  grid-template-rows: repeat(22, 40px); /* 22 filas de 40px */
+  grid-template-columns: repeat(12, 40px); /* 12 columnas de 40px */
+  gap: 1px; /* Espacio entre celdas */
+  background-color: black;
+  padding: 10px;
+}
+
+.cell {
+  width: 40px;  /* Se mantiene el tamaño de la celda de 40px */
+  height: 40px; /* Se mantiene el tamaño de la celda de 40px */
+  border: 1px solid #333;
+}
+
+.cell.empty {
+  background-color: #fff; /* Color para las celdas vacías */
+}
+
+.cell.filled {
+  background-color: #000; /* Color para las celdas llenas */
+}

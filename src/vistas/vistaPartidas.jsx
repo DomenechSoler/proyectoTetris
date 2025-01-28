@@ -1,5 +1,5 @@
-import { useState } from "react";
-import "../App.css";
+import { useState } from "react"
+import "../App.css"
 
 export default function TablaPartidas() {
     const [partidas, setPartidas] = useState([
@@ -21,58 +21,58 @@ export default function TablaPartidas() {
             puntos: 750,
             fecha: "05-03-2024"
         }
-    ]);
+    ])
 
-    const [ordenAscendente, setOrdenAscendente] = useState(true);
-    const [modalVisible, setModalVisible] = useState(false);
+    const [ordenAscendente, setOrdenAscendente] = useState(true)
+    const [modalVisible, setModalVisible] = useState(false)
     const [nuevaPartida, setNuevaPartida] = useState({
         avatar: "",
         nick: "",
         puntos: "",
         fecha: ""
-    });
+    })
 
     const ordenarPorNick = () => {
         const ordenado = [...partidas].sort((a, b) => {
             return ordenAscendente
                 ? a.nick.localeCompare(b.nick)
-                : b.nick.localeCompare(a.nick);
-        });
-        setPartidas(ordenado);
-        setOrdenAscendente(!ordenAscendente);
-    };
+                : b.nick.localeCompare(a.nick)
+        })
+        setPartidas(ordenado)
+        setOrdenAscendente(!ordenAscendente)
+    }
 
     const ordenarPorPuntos = () => {
         const ordenado = [...partidas].sort((a, b) => {
-            return ordenAscendente ? a.puntos - b.puntos : b.puntos - a.puntos;
-        });
-        setPartidas(ordenado);
-        setOrdenAscendente(!ordenAscendente);
-    };
+            return ordenAscendente ? a.puntos - b.puntos : b.puntos - a.puntos
+        })
+        setPartidas(ordenado)
+        setOrdenAscendente(!ordenAscendente)
+    }
 
     const ordenarPorFecha = () => {
         const ordenado = [...partidas].sort((a, b) => {
-            const fechaA = new Date(a.fecha.split("-").reverse().join("-"));
-            const fechaB = new Date(b.fecha.split("-").reverse().join("-"));
-            return ordenAscendente ? fechaA - fechaB : fechaB - fechaA;
-        });
-        setPartidas(ordenado);
-        setOrdenAscendente(!ordenAscendente);
-    };
+            const fechaA = new Date(a.fecha.split("-").reverse().join("-"))
+            const fechaB = new Date(b.fecha.split("-").reverse().join("-"))
+            return ordenAscendente ? fechaA - fechaB : fechaB - fechaA
+        })
+        setPartidas(ordenado)
+        setOrdenAscendente(!ordenAscendente)
+    }
 
     const DatosNuevos = (e) => {
-        const { name, value } = e.target;
-        setNuevaPartida({ ...nuevaPartida, [name]: value });
-    };
+        const { name, value } = e.target
+        setNuevaPartida({ ...nuevaPartida, [name]: value })
+    }
     const AñadirArray = () => {
         if (!nuevaPartida.nick || !nuevaPartida.puntos || !nuevaPartida.fecha) {
-            alert("Por favor, completa todos los campos");
-            return;
+            alert("Por favor, completa todos los campos")
+            return
         }
-        setPartidas([...partidas, { ...nuevaPartida, puntos: parseInt(nuevaPartida.puntos) }]);
-        setModalVisible(false);
-        setNuevaPartida({ avatar: "", nick: "", puntos: "", fecha: "" });
-    };
+        setPartidas([...partidas, { ...nuevaPartida, puntos: parseInt(nuevaPartida.puntos) }])
+        setModalVisible(false)
+        setNuevaPartida({ avatar: "", nick: "", puntos: "", fecha: "" })
+    }
 
 
     return (
@@ -155,5 +155,5 @@ export default function TablaPartidas() {
                 </div>
             )}
         </div>
-    );
+    )
 }

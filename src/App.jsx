@@ -1,9 +1,9 @@
-import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import VistaInicio from './vistas/vistaInicio';
-import VistaJuego from './vistas/vistaJuego';
-import VistaPartidas from './vistas/vistaPartidas';
-import VistaRanking from './vistas/vistaRanking';
+import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import VistaInicio from './vistas/vistaInicio'
+import VistaJuego from './vistas/vistaJuego'
+import VistaPartidas from './vistas/vistaPartidas'
+import VistaRanking from './vistas/vistaRanking'
 
 function App() {
   return (
@@ -32,7 +32,7 @@ function App() {
         </Routes>
       </div>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
