@@ -1,5 +1,5 @@
 import Panel from '../componentes/panel'
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { modelos } from '../lib/modelos'
 import Pieza, { VariacionesPiezas } from '../componentes/pieza'
 import nuevaPieza from '../lib/nuevaPieza'
@@ -36,6 +36,37 @@ export default function VistaJuego() {
         const nuevoPanel = pintarPieza(arrayCasillas, nueva)
         setArrayCasillas(nuevoPanel)
     }
+
+    const moverDra = () => console.log("Mover a la derecha")
+    const moverIzq = () => console.log("Mover a la izquierda")
+    const bajar = () => console.log("Bajar pieza")
+    const girar = () => console.log("Girar pieza")
+
+    const controlTeclas = (event) => {
+        switch (event.key) {
+            case "ArrowRight":
+                moverDra()
+                break
+            case "ArrowLeft":
+                moverIzq()
+                break
+            case "ArrowDown":
+                bajar()
+                break
+            case "ArrowUp":
+                girar()
+                break
+            default:
+                break
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener('keydown', controlTeclas)
+        return () => {
+            window.removeEventListener('keydown', controlTeclas)
+        }
+    }, [])
 
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
