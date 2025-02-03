@@ -39,7 +39,15 @@ export default function VistaJuego() {
 
     const moverDra = () => console.log("Mover a la derecha")
     const moverIzq = () => console.log("Mover a la izquierda")
-    const bajar = () => console.log("Bajar pieza")
+    const bajar = () => {
+        console.log("Bajar pieza")
+        setPiezaActual(piezaPrevia => {
+            const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
     const girar = () => console.log("Girar pieza")
 
     const controlTeclas = (event) => {
