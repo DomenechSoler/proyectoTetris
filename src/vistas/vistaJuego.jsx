@@ -8,6 +8,7 @@ import pintarPieza from '../lib/pintarPieza'
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
     const [intervalId, setIntervalId] = useState(null)
+    const [puntuacion, setPuntuacion] = useState(0);
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -40,6 +41,7 @@ export default function VistaJuego() {
 
     const moverDra = () => {
         console.log("Mover a la derecha")
+        setPuntuacion(puntuacion => puntuacion + 10);
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -49,6 +51,7 @@ export default function VistaJuego() {
     }
     const moverIzq = () => {
         console.log("Mover a la izquierda")
+        setPuntuacion(puntuacion => puntuacion + 10);
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -56,17 +59,46 @@ export default function VistaJuego() {
             return nuevaPieza
         })
     }
+
+    const tocaSuelo = (pieza) => {
+        const { matriz, fila, columna } = pieza
+        let suelo = false
+    
+        matriz.map((filaPieza, i) => {
+            filaPieza.map((celda, j) => {
+                if (celda !== 0) {
+                    const nuevaFila = fila + i + 1
+                    if (nuevaFila >= arrayCasillas.length || arrayCasillas[nuevaFila][columna + j] === 1) {
+                        suelo = true
+                    }
+                }
+            })
+        })
+    
+        return suelo
+    }
+
     const bajar = () => {
         console.log("Bajar pieza")
         setPiezaActual(piezaPrevia => {
-            const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
-            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-            setArrayCasillas(nuevoPanel)
-            return nuevaPieza
-        })
-    }
+            if (tocaSuelo(piezaPrevia)) {
+                setPuntuacion(puntuacion => puntuacion + 50)
+                clearInterval(intervalId)
+                setIntervalId(null)
+                insertaNuevaPieza()
+                return piezaPrevia
+            } else {
+                const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
+                const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+                setArrayCasillas(nuevoPanel)
+                setPuntuacion(puntuacion => puntuacion + 10)
+                return nuevaPieza
+            }
+        });
+    };
     const girar = () => {
         console.log("Girar pieza")
+        setPuntuacion(puntuacion => puntuacion + 20);
         setPiezaActual(piezaAnterior => {
             const filas = piezaAnterior.matriz.length
             const columnas = piezaAnterior.matriz[0].length
@@ -136,7 +168,7 @@ export default function VistaJuego() {
                     <h4>Nivel: <span>2</span></h4>
                     <h4>Tiempo: <span>5:22</span></h4>
                     <h4>Lineas: <span>2</span></h4>
-                    <h4>Puntos: <span>211122</span></h4>
+                    <h4>Puntos: <span>{puntuacion}</span></h4>
                 </div>
                 <div className="col-4 d-flex justify-content-center">
                     <div id="" className="p-5">
