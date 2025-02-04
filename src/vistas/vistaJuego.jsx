@@ -8,6 +8,7 @@ import pintarPieza from '../lib/pintarPieza'
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
 
+
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
         if (!nueva || !nueva.pieza || !nueva.pieza[0]) {
@@ -37,8 +38,24 @@ export default function VistaJuego() {
         setArrayCasillas(nuevoPanel)
     }
 
-    const moverDra = () => console.log("Mover a la derecha")
-    const moverIzq = () => console.log("Mover a la izquierda")
+    const moverDra = () => {
+        console.log("Mover a la derecha")
+        setPiezaActual(piezaAnterior => {
+            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
+    const moverIzq = () => {
+        console.log("Mover a la izquierda")
+        setPiezaActual(piezaAnterior => {
+            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
     const bajar = () => {
         console.log("Bajar pieza")
         setPiezaActual(piezaPrevia => {
@@ -48,7 +65,25 @@ export default function VistaJuego() {
             return nuevaPieza
         })
     }
-    const girar = () => console.log("Girar pieza")
+    const girar = () => {
+        console.log("Girar pieza")
+        setPiezaActual(piezaAnterior => {
+            const filas = piezaAnterior.matriz.length
+            const columnas = piezaAnterior.matriz[0].length
+            const nuevaMatriz = Array.from({ length: columnas }, () => Array(filas).fill(0))
+    
+            piezaAnterior.matriz.forEach((fila, i) => {
+                fila.forEach((celda, j) => {
+                    nuevaMatriz[j][filas - 1 - i] = celda
+                })
+            })
+    
+            const nuevaPieza = { ...piezaAnterior, matriz: nuevaMatriz }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
 
     const controlTeclas = (event) => {
         switch (event.key) {
@@ -76,6 +111,9 @@ export default function VistaJuego() {
         }
     }, [])
 
+        const jugar = () => {
+            insertaNuevaPieza();
+        };
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
     const pieza1 = nuevaPieza(modelos.piezas)
@@ -129,7 +167,7 @@ export default function VistaJuego() {
                 </div>
             </div>
             <div className="d-flex justify-content-center mt-4">
-                <button onClick={insertaNuevaPieza} className="btn btn-primary">Insertar Nueva Pieza</button>
+                <button onClick={jugar} className="btn btn-primary">Insertar Nueva Pieza</button>
             </div>
             <VariacionesPiezas />
         </div>
