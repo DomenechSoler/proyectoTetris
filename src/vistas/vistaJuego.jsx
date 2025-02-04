@@ -1,5 +1,5 @@
 import Panel from '../componentes/panel'
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { modelos } from '../lib/modelos'
 import Pieza, { VariacionesPiezas } from '../componentes/pieza'
 import nuevaPieza from '../lib/nuevaPieza'
@@ -7,6 +7,7 @@ import pintarPieza from '../lib/pintarPieza'
 
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
+    const [intervalId, setIntervalId] = useState(null)
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -37,6 +38,90 @@ export default function VistaJuego() {
         setArrayCasillas(nuevoPanel)
     }
 
+    const moverDra = () => {
+        console.log("Mover a la derecha")
+        setPiezaActual(piezaAnterior => {
+            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
+    const moverIzq = () => {
+        console.log("Mover a la izquierda")
+        setPiezaActual(piezaAnterior => {
+            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
+    const bajar = () => {
+        console.log("Bajar pieza")
+        setPiezaActual(piezaPrevia => {
+            const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
+    const girar = () => {
+        console.log("Girar pieza")
+        setPiezaActual(piezaAnterior => {
+            const filas = piezaAnterior.matriz.length
+            const columnas = piezaAnterior.matriz[0].length
+            const nuevaMatriz = Array.from({ length: columnas }, () => Array(filas).fill(0))
+    
+            piezaAnterior.matriz.forEach((fila, i) => {
+                fila.forEach((celda, j) => {
+                    nuevaMatriz[j][filas - 1 - i] = celda
+                })
+            })
+    
+            const nuevaPieza = { ...piezaAnterior, matriz: nuevaMatriz }
+            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+            setArrayCasillas(nuevoPanel)
+            return nuevaPieza
+        })
+    }
+
+    const controlTeclas = (event) => {
+        switch (event.key) {
+            case "ArrowRight":
+                moverDra()
+                break
+            case "ArrowLeft":
+                moverIzq()
+                break
+            case "ArrowDown":
+                bajar()
+                break
+            case "ArrowUp":
+                girar()
+                break
+            default:
+                break
+        }
+    }
+
+    useEffect(() => {
+        window.addEventListener('keydown', controlTeclas)
+        return () => {
+            window.removeEventListener('keydown', controlTeclas)
+        }
+    }, [])
+
+        const iniciarMovimiento = () => {
+            if (!intervalId) {
+                const id = setInterval(bajar, 1000)
+                setIntervalId(id)
+            }
+        }
+
+        const jugar = () => {
+            insertaNuevaPieza();
+            iniciarMovimiento();
+        };
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
     const pieza1 = nuevaPieza(modelos.piezas)
@@ -90,7 +175,7 @@ export default function VistaJuego() {
                 </div>
             </div>
             <div className="d-flex justify-content-center mt-4">
-                <button onClick={insertaNuevaPieza} className="btn btn-primary">Insertar Nueva Pieza</button>
+                <button onClick={jugar} className="btn btn-primary">Insertar Nueva Pieza</button>
             </div>
             <VariacionesPiezas />
         </div>
