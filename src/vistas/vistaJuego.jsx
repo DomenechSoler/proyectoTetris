@@ -1,5 +1,5 @@
 import Panel from '../componentes/panel'
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { modelos } from '../lib/modelos'
 import Pieza, { VariacionesPiezas } from '../componentes/pieza'
 import nuevaPieza from '../lib/nuevaPieza'
@@ -7,8 +7,9 @@ import pintarPieza from '../lib/pintarPieza'
 
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
-    const [intervalId, setIntervalId] = useState(null)
-    const [puntuacion, setPuntuacion] = useState(0);
+    const intervalIdRef = useRef(null);
+    const [puntuacion, setPuntuacion] = useState(0)
+    const [mostrarBotonGuardar, setMostrarBotonGuardar] = useState(false)
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -41,7 +42,7 @@ export default function VistaJuego() {
 
     const moverDra = () => {
         console.log("Mover a la derecha")
-        setPuntuacion(puntuacion => puntuacion + 10);
+        setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -51,7 +52,7 @@ export default function VistaJuego() {
     }
     const moverIzq = () => {
         console.log("Mover a la izquierda")
-        setPuntuacion(puntuacion => puntuacion + 10);
+        setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -79,26 +80,29 @@ export default function VistaJuego() {
     }
 
     const bajar = () => {
-        console.log("Bajar pieza")
+        console.log("Bajar pieza");
         setPiezaActual(piezaPrevia => {
             if (tocaSuelo(piezaPrevia)) {
-                setPuntuacion(puntuacion => puntuacion + 50)
-                clearInterval(intervalId)
-                setIntervalId(null)
-                insertaNuevaPieza()
-                return piezaPrevia
+                setPuntuacion(puntuacion => puntuacion + 50);
+                if (intervalIdRef.current) {
+                    console.log("Limpiando intervalo");
+                    clearInterval(intervalIdRef.current); // Detener el intervalo
+                    intervalIdRef.current = null;
+                }
+                setMostrarBotonGuardar(true); // Mostrar el botón de guardar partida
+                return piezaPrevia;
             } else {
-                const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
-                const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-                setArrayCasillas(nuevoPanel)
-                setPuntuacion(puntuacion => puntuacion + 10)
-                return nuevaPieza
+                const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 };
+                const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza);
+                setArrayCasillas(nuevoPanel);
+                setPuntuacion(puntuacion => puntuacion + 10);
+                return nuevaPieza;
             }
         });
     };
     const girar = () => {
         console.log("Girar pieza")
-        setPuntuacion(puntuacion => puntuacion + 20);
+        setPuntuacion(puntuacion => puntuacion + 20)
         setPiezaActual(piezaAnterior => {
             const filas = piezaAnterior.matriz.length
             const columnas = piezaAnterior.matriz[0].length
@@ -144,21 +148,25 @@ export default function VistaJuego() {
     }, [])
 
         const iniciarMovimiento = () => {
-            if (!intervalId) {
+            if (!intervalIdRef.current) {
                 const id = setInterval(bajar, 1000)
-                setIntervalId(id)
+                intervalIdRef.current = id;
             }
         }
 
         const jugar = () => {
-            insertaNuevaPieza();
-            iniciarMovimiento();
-        };
+            insertaNuevaPieza()
+            iniciarMovimiento()
+        }
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
     const pieza1 = nuevaPieza(modelos.piezas)
     const pieza2 = nuevaPieza(modelos.piezas)
     const pieza3 = nuevaPieza(modelos.piezas)
+
+    const guardarPartida = () => {
+        console.log("Guardar partida")
+    }
 
 
     return (
@@ -206,6 +214,9 @@ export default function VistaJuego() {
                     </div>
                 </div>
             </div>
+            {mostrarBotonGuardar && <div className="d-flex justify-content-center mt-4">
+            <button onClick={guardarPartida} className='btn btn-success'>Guardar</button>
+            </div>}
             <div className="d-flex justify-content-center mt-4">
                 <button onClick={jugar} className="btn btn-primary">Insertar Nueva Pieza</button>
             </div>
