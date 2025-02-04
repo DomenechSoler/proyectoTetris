@@ -7,7 +7,7 @@ import pintarPieza from '../lib/pintarPieza'
 
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
-
+    const [intervalId, setIntervalId] = useState(null)
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -111,8 +111,16 @@ export default function VistaJuego() {
         }
     }, [])
 
+        const iniciarMovimiento = () => {
+            if (!intervalId) {
+                const id = setInterval(bajar, 1000)
+                setIntervalId(id)
+            }
+        }
+
         const jugar = () => {
             insertaNuevaPieza();
+            iniciarMovimiento();
         };
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
