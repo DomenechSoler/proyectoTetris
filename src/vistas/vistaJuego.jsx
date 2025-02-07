@@ -166,6 +166,11 @@ export default function VistaJuego() {
 
     const guardarPartida = () => {
         console.log("Guardar partida")
+        registraPartida(puntuacion)
+    }
+
+    const registraPartida = (puntuacion) => {
+        console.log("Partida registrada:", { puntuacion})
     }
 
 
