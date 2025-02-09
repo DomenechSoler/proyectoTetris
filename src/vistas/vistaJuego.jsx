@@ -1,13 +1,20 @@
+import React, { useState, useEffect, useRef, useContext } from "react"
+import { useNavigate } from 'react-router-dom' // Importa useNavigate
 import Panel from '../componentes/panel'
-import React, { useState, useEffect } from "react"
 import { modelos } from '../lib/modelos'
 import Pieza, { VariacionesPiezas } from '../componentes/pieza'
 import nuevaPieza from '../lib/nuevaPieza'
 import pintarPieza from '../lib/pintarPieza'
+import { PartidasContext } from '../vistas/PartidasContext'
 
 export default function VistaJuego() {
     const [arrayCasillas, setArrayCasillas] = useState(modelos.matriz)
-    const [intervalId, setIntervalId] = useState(null)
+    const intervalIdRef = useRef(null)
+    const [puntuacion, setPuntuacion] = useState(0)
+    const [mostrarBotonGuardar, setMostrarBotonGuardar] = useState(false)
+    const [redirigir, setRedirigir] = useState(false) // Estado adicional para controlar la redirección
+    const { registraPartida } = useContext(PartidasContext)
+    const navigate = useNavigate() // Hook para redirigir
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -28,9 +35,9 @@ export default function VistaJuego() {
         }
         nueva.fila = 0
         nueva.columna = Math.floor(Math.random() * (modelos.matriz[0].length - nueva.matriz[0].length))
-        if(nueva.columna == 0){
+        if (nueva.columna == 0) {
             nueva.columna += 1
-        }else if(nueva.columna == 12){
+        } else if (nueva.columna == 12) {
             nueva.columna -= 1
         }
         setPiezaActual(nueva)
@@ -40,6 +47,7 @@ export default function VistaJuego() {
 
     const moverDra = () => {
         console.log("Mover a la derecha")
+        setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -47,8 +55,10 @@ export default function VistaJuego() {
             return nuevaPieza
         })
     }
+
     const moverIzq = () => {
         console.log("Mover a la izquierda")
+        setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
             const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
@@ -56,28 +66,61 @@ export default function VistaJuego() {
             return nuevaPieza
         })
     }
+
+    const tocaSuelo = (pieza) => {
+        const { matriz, fila, columna } = pieza
+        let suelo = false
+
+        matriz.map((filaPieza, i) => {
+            filaPieza.map((celda, j) => {
+                if (celda !== 0) {
+                    const nuevaFila = fila + i + 1
+                    if (nuevaFila >= arrayCasillas.length || arrayCasillas[nuevaFila][columna + j] === 1) {
+                        suelo = true
+                    }
+                }
+            })
+        })
+
+        return suelo
+    }
+
     const bajar = () => {
         console.log("Bajar pieza")
         setPiezaActual(piezaPrevia => {
-            const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
-            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-            setArrayCasillas(nuevoPanel)
-            return nuevaPieza
+            if (tocaSuelo(piezaPrevia)) {
+                setPuntuacion(puntuacion => puntuacion + 50)
+                if (intervalIdRef.current) {
+                    console.log("Limpiando intervalo")
+                    clearInterval(intervalIdRef.current) // Detener el intervalo
+                    intervalIdRef.current = null
+                }
+                setMostrarBotonGuardar(true) // Mostrar el botón de guardar partida
+                return piezaPrevia
+            } else {
+                const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
+                const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+                setArrayCasillas(nuevoPanel)
+                setPuntuacion(puntuacion => puntuacion + 10)
+                return nuevaPieza
+            }
         })
     }
+
     const girar = () => {
         console.log("Girar pieza")
+        setPuntuacion(puntuacion => puntuacion + 20)
         setPiezaActual(piezaAnterior => {
             const filas = piezaAnterior.matriz.length
             const columnas = piezaAnterior.matriz[0].length
             const nuevaMatriz = Array.from({ length: columnas }, () => Array(filas).fill(0))
-    
+
             piezaAnterior.matriz.forEach((fila, i) => {
                 fila.forEach((celda, j) => {
                     nuevaMatriz[j][filas - 1 - i] = celda
                 })
             })
-    
+
             const nuevaPieza = { ...piezaAnterior, matriz: nuevaMatriz }
             const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
             setArrayCasillas(nuevoPanel)
@@ -111,23 +154,35 @@ export default function VistaJuego() {
         }
     }, [])
 
-        const iniciarMovimiento = () => {
-            if (!intervalId) {
-                const id = setInterval(bajar, 1000)
-                setIntervalId(id)
-            }
+    const iniciarMovimiento = () => {
+        if (!intervalIdRef.current) {
+            const id = setInterval(bajar, 1000)
+            intervalIdRef.current = id
         }
+    }
 
-        const jugar = () => {
-            insertaNuevaPieza();
-            iniciarMovimiento();
-        };
+    const jugar = () => {
+        insertaNuevaPieza()
+        iniciarMovimiento()
+    }
+
+    useEffect(() => {
+        if (redirigir) {
+            navigate('/Partidas') // Redirigir a vistaPartidas
+        }
+    }, [redirigir, navigate])
+
+    const guardarPartida = () => {
+        console.log(`Puntuación actual al guardar: ${puntuacion}`)
+        registraPartida(puntuacion)
+        setRedirigir(true)
+    }
+
     const panelConPieza = piezaActual ? pintarPieza(arrayCasillas, piezaActual) : arrayCasillas
 
     const pieza1 = nuevaPieza(modelos.piezas)
     const pieza2 = nuevaPieza(modelos.piezas)
     const pieza3 = nuevaPieza(modelos.piezas)
-
 
     return (
         <div id="juego" className="">
@@ -136,7 +191,7 @@ export default function VistaJuego() {
                     <h4>Nivel: <span>2</span></h4>
                     <h4>Tiempo: <span>5:22</span></h4>
                     <h4>Lineas: <span>2</span></h4>
-                    <h4>Puntos: <span>211122</span></h4>
+                    <h4>Puntos: <span>{puntuacion}</span></h4>
                 </div>
                 <div className="col-4 d-flex justify-content-center">
                     <div id="" className="p-5">
@@ -147,13 +202,13 @@ export default function VistaJuego() {
                     <div id="piezaSiguiente">
                         <h4>Pieza siguiente:</h4>
                         <div className="piezaSiguiente m-2">
-                            <Pieza matriz={pieza1.matriz} /> 
+                            <Pieza matriz={pieza1.matriz} />
                         </div>
                         <div className="piezaSiguiente m-2">
-                            <Pieza matriz={pieza2.matriz} /> 
+                            <Pieza matriz={pieza2.matriz} />
                         </div>
                         <div className="piezaSiguiente m-2">
-                            <Pieza matriz={pieza3.matriz} /> 
+                            <Pieza matriz={pieza3.matriz} />
                         </div>
                     </div>
                     <hr />
@@ -174,6 +229,9 @@ export default function VistaJuego() {
                     </div>
                 </div>
             </div>
+            {mostrarBotonGuardar && <div className="d-flex justify-content-center mt-4">
+                <button onClick={guardarPartida} className='btn btn-success'>Guardar</button>
+            </div>}
             <div className="d-flex justify-content-center mt-4">
                 <button onClick={jugar} className="btn btn-primary">Insertar Nueva Pieza</button>
             </div>
