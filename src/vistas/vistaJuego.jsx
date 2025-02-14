@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react"
-import { useNavigate } from 'react-router-dom' // Importa useNavigate
+import { useNavigate } from 'react-router-dom'
 import Panel from '../componentes/panel'
 import { modelos } from '../lib/modelos'
 import Pieza, { VariacionesPiezas } from '../componentes/pieza'
@@ -12,9 +12,9 @@ export default function VistaJuego() {
     const intervalIdRef = useRef(null)
     const [puntuacion, setPuntuacion] = useState(0)
     const [mostrarBotonGuardar, setMostrarBotonGuardar] = useState(false)
-    const [redirigir, setRedirigir] = useState(false) // Estado adicional para controlar la redirección
+    const [redirigir, setRedirigir] = useState(false) 
     const { registraPartida } = useContext(PartidasContext)
-    const navigate = useNavigate() // Hook para redirigir
+    const navigate = useNavigate() 
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -26,6 +26,27 @@ export default function VistaJuego() {
         nueva.columna = Math.floor(Math.random() * (modelos.matriz[0].length - nueva.pieza[0].length))
         return nueva
     })
+
+    const hayColision = (pieza, nuevaFila, nuevaColumna) => {
+        const { matriz } = pieza
+        for (let i = 0; i < matriz.length; i++) {
+            for (let j = 0; j < matriz[i].length; j++) {
+                if (matriz[i][j] !== 0) {
+                    const fila = nuevaFila + i
+                    const columna = nuevaColumna + j
+                    if (
+                        fila >= arrayCasillas.length ||
+                        columna < 0 ||
+                        columna >= arrayCasillas[0].length ||
+                        arrayCasillas[fila][columna] !== 0
+                    ) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
 
     const insertaNuevaPieza = () => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -41,72 +62,54 @@ export default function VistaJuego() {
             nueva.columna -= 1
         }
         setPiezaActual(nueva)
-        const nuevoPanel = pintarPieza(arrayCasillas, nueva)
-        setArrayCasillas(nuevoPanel)
     }
 
     const moverDra = () => {
         console.log("Mover a la derecha")
         setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
-            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna + 1 }
-            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-            setArrayCasillas(nuevoPanel)
-            return nuevaPieza
+            const nuevaColumna = piezaAnterior.columna + 1
+            if (!hayColision(piezaAnterior, piezaAnterior.fila, nuevaColumna)) {
+                return { ...piezaAnterior, columna: nuevaColumna }
+            }
+            return piezaAnterior
         })
     }
-
+    
     const moverIzq = () => {
         console.log("Mover a la izquierda")
         setPuntuacion(puntuacion => puntuacion + 10)
         setPiezaActual(piezaAnterior => {
-            const nuevaPieza = { ...piezaAnterior, columna: piezaAnterior.columna - 1 }
-            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-            setArrayCasillas(nuevoPanel)
-            return nuevaPieza
+            const nuevaColumna = piezaAnterior.columna - 1
+            if (!hayColision(piezaAnterior, piezaAnterior.fila, nuevaColumna)) {
+                return { ...piezaAnterior, columna: nuevaColumna }
+            }
+            return piezaAnterior
         })
     }
-
-    const tocaSuelo = (pieza) => {
-        const { matriz, fila, columna } = pieza
-        let suelo = false
-
-        matriz.map((filaPieza, i) => {
-            filaPieza.map((celda, j) => {
-                if (celda !== 0) {
-                    const nuevaFila = fila + i + 1
-                    if (nuevaFila >= arrayCasillas.length || arrayCasillas[nuevaFila][columna + j] === 1) {
-                        suelo = true
-                    }
-                }
-            })
-        })
-
-        return suelo
-    }
-
+    
     const bajar = () => {
         console.log("Bajar pieza")
-        setPiezaActual(piezaPrevia => {
-            if (tocaSuelo(piezaPrevia)) {
+        setPiezaActual(piezaAnterior => {
+            const nuevaFila = piezaAnterior.fila + 1
+            if (hayColision(piezaAnterior, nuevaFila, piezaAnterior.columna)) {
                 setPuntuacion(puntuacion => puntuacion + 50)
                 if (intervalIdRef.current) {
                     console.log("Limpiando intervalo")
-                    clearInterval(intervalIdRef.current) // Detener el intervalo
+                    clearInterval(intervalIdRef.current) 
                     intervalIdRef.current = null
                 }
-                setMostrarBotonGuardar(true) // Mostrar el botón de guardar partida
-                return piezaPrevia
-            } else {
-                const nuevaPieza = { ...piezaPrevia, fila: piezaPrevia.fila + 1 }
-                const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
+                setMostrarBotonGuardar(true) 
+                const nuevoPanel = pintarPieza(arrayCasillas, piezaAnterior)
                 setArrayCasillas(nuevoPanel)
+                return piezaAnterior
+            } else {
                 setPuntuacion(puntuacion => puntuacion + 10)
-                return nuevaPieza
+                return { ...piezaAnterior, fila: nuevaFila }
             }
         })
     }
-
+    
     const girar = () => {
         console.log("Girar pieza")
         setPuntuacion(puntuacion => puntuacion + 20)
@@ -114,20 +117,20 @@ export default function VistaJuego() {
             const filas = piezaAnterior.matriz.length
             const columnas = piezaAnterior.matriz[0].length
             const nuevaMatriz = Array.from({ length: columnas }, () => Array(filas).fill(0))
-
+    
             piezaAnterior.matriz.forEach((fila, i) => {
                 fila.forEach((celda, j) => {
                     nuevaMatriz[j][filas - 1 - i] = celda
                 })
             })
-
+    
             const nuevaPieza = { ...piezaAnterior, matriz: nuevaMatriz }
-            const nuevoPanel = pintarPieza(arrayCasillas, nuevaPieza)
-            setArrayCasillas(nuevoPanel)
-            return nuevaPieza
+            if (!hayColision(nuevaPieza, piezaAnterior.fila, piezaAnterior.columna)) {
+                return nuevaPieza
+            }
+            return piezaAnterior
         })
     }
-
     const controlTeclas = (event) => {
         switch (event.key) {
             case "ArrowRight":
@@ -168,7 +171,7 @@ export default function VistaJuego() {
 
     useEffect(() => {
         if (redirigir) {
-            navigate('/Partidas') // Redirigir a vistaPartidas
+            navigate('/Partidas') 
         }
     }, [redirigir, navigate])
 
