@@ -24,14 +24,17 @@ export default function VistaJuego() {
 
     const [piezaActual, setPiezaActual] = useState(() => {
         const nueva = nuevaPieza(modelos.piezas)
-        if (!nueva || !nueva.pieza || !nueva.pieza[0]) {
+    if (!nueva || !nueva.pieza || !nueva.pieza[0]) {
             console.error("Error al crear la nueva pieza: nueva.pieza es null o undefined")
             return null
-        }
+    }
         nueva.fila = 0
         nueva.columna = Math.floor(Math.random() * (modelos.matriz[0].length - nueva.pieza[0].length))
         return nueva
     })
+
+    const [piezaGuardada, setPiezaGuardada] = useState(null)
+
 
     const hayColision = (pieza, nuevaFila, nuevaColumna) => {
         const { matriz } = pieza
@@ -54,9 +57,21 @@ export default function VistaJuego() {
         }
         return false
     }
-    
+
     const FinDePartida = (pieza) => {
         return hayColision(pieza, pieza.fila, pieza.columna)
+    }
+
+    const reinicializarPieza = (pieza) => {
+        const nuevaPiezaHold = { ...pieza }
+        nuevaPiezaHold.fila = 0
+        nuevaPiezaHold.columna = Math.floor(Math.random() * (modelos.matriz[0].length - nuevaPiezaHold.matriz[0].length))
+        if (nuevaPiezaHold.columna === 0) {
+            nuevaPiezaHold.columna = 1
+        } else if (nuevaPiezaHold.columna === 12) {
+            nuevaPiezaHold.columna = 11
+        }
+            return nuevaPiezaHold
     }
 
     const insertaNuevaPieza = () => {
@@ -93,7 +108,7 @@ export default function VistaJuego() {
             return piezaAnterior
         })
     }
-    
+
     const moverIzq = () => {
         console.log("Mover a la izquierda")
         setPuntuacion(puntuacion => puntuacion + 10)
@@ -105,12 +120,12 @@ export default function VistaJuego() {
             return piezaAnterior
         })
     }
-    
+
     const eliminarFilasCompletas = (tablero) => {
         const nuevasFilas = tablero.slice(0, -1).filter(fila => fila.some(celda => celda === 0))
         const filasEliminadas = tablero.length - 1 - nuevasFilas.length
         const filasVacias = Array.from({ length: filasEliminadas }, () => Array(tablero[0].length).fill(0))
-        
+
         for (let i = 0; i < filasVacias.length; i++) {
             filasVacias[i][0] = 1 
             filasVacias[i][filasVacias[i].length - 1] = 1
@@ -140,7 +155,7 @@ export default function VistaJuego() {
             }
         })
     }
-    
+
     const girar = () => {
         console.log("Girar pieza")
         setPuntuacion(puntuacion => puntuacion + 20)
@@ -163,6 +178,19 @@ export default function VistaJuego() {
         })
     }
 
+    const presionarG = () => {
+        if (!piezaActual) return
+        if (!piezaGuardada) {
+            setPiezaGuardada({ ...piezaActual })
+            insertaNuevaPieza()
+        } else {
+            const piezaParaUsar = reinicializarPieza(piezaGuardada)
+            setPiezaGuardada({ ...piezaActual })
+            setPiezaActual(piezaParaUsar)
+        }
+    }
+
+
     const controlTeclas = (event) => {
         switch (event.key) {
             case "ArrowRight":
@@ -177,6 +205,10 @@ export default function VistaJuego() {
             case "ArrowUp":
                 girar()
                 break
+            case "g":
+            case "G":
+                presionarG()
+                break
             default:
                 break
         }
@@ -187,7 +219,7 @@ export default function VistaJuego() {
         return () => {
             window.removeEventListener('keydown', controlTeclas)
         }
-    }, [])
+    }, [piezaActual, piezaGuardada])
 
     const iniciarMovimiento = () => {
         if (!intervalIdRef.current) {
@@ -195,7 +227,7 @@ export default function VistaJuego() {
             intervalIdRef.current = id
         }
     }
-    
+
     const jugar = () => {
         insertaNuevaPieza()
         iniciarMovimiento()
@@ -251,7 +283,7 @@ export default function VistaJuego() {
                         <h4>Pieza guardada:</h4>
                         <div className="piezaGuardada">
                             <div className="piezaSiguiente2 m-2">
-                                
+                                {piezaGuardada ? (<Pieza matriz={piezaGuardada.matriz} />) : (<span>No hay pieza</span>)}
                             </div>
                         </div>
                     </div>
