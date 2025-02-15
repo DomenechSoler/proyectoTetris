@@ -19,6 +19,8 @@ export default function VistaJuego() {
     const [mostrarBotonGuardar, setMostrarBotonGuardar] = useState(false)
     const [redirigir, setRedirigir] = useState(false) 
     const [lineasEliminadas, setLineasEliminadas] = useState(0)
+    const [nivel, setNivel] = useState(1) // Estado para el nivel
+    const [tiempo, setTiempo] = useState(0) // Estado para el tiempo
     const { registraPartida } = useContext(PartidasContext)
     const navigate = useNavigate() 
 
@@ -35,6 +37,25 @@ export default function VistaJuego() {
 
     const [piezaGuardada, setPiezaGuardada] = useState(null)
 
+    useEffect(() => {
+        if (lineasEliminadas >= nivel * 5) {
+            setNivel(prevNivel => prevNivel + 1)
+        }
+    }, [lineasEliminadas, nivel])
+
+    useEffect(() => {
+        let tiempoIntervalId = null
+        if (intervalIdRef.current) {
+            tiempoIntervalId = setInterval(() => {
+                setTiempo(prevTiempo => prevTiempo + 1)
+            }, 1000)
+        }
+        return () => {
+            if (tiempoIntervalId) {
+                clearInterval(tiempoIntervalId)
+            }
+        }
+    }, [intervalIdRef.current])
 
     const hayColision = (pieza, nuevaFila, nuevaColumna) => {
         const { matriz } = pieza
@@ -255,8 +276,8 @@ export default function VistaJuego() {
         <div id="juego" className="">
             <div className="row">
                 <div className="col-4 d-flex flex-column justify-content-end align-items-center p-5">
-                    <h4>Nivel: <span>2</span></h4>
-                    <h4>Tiempo: <span>0</span></h4>
+                    <h4>Nivel: <span>{nivel}</span></h4>
+                    <h4>Tiempo: <span>{tiempo}</span></h4>
                     <h4>Lineas: <span>{lineasEliminadas}</span></h4>
                     <h4>Puntos: <span>{puntuacion}</span></h4>
                 </div>
