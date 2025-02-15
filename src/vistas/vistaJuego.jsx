@@ -55,6 +55,9 @@ export default function VistaJuego() {
         return false
     }
     
+    const FinDePartida = (pieza) => {
+        return hayColision(pieza, pieza.fila, pieza.columna)
+    }
 
     const insertaNuevaPieza = () => {
         const nueva = nuevaPieza(modelos.piezas)
@@ -68,6 +71,13 @@ export default function VistaJuego() {
             nueva.columna += 1
         } else if (nueva.columna == 12) {
             nueva.columna -= 1
+        }
+        if (FinDePartida(nueva)) {
+            alert("Fin de la partida")
+            setMostrarBotonGuardar(true)
+            clearInterval(intervalIdRef.current)
+            intervalIdRef.current = null
+            return
         }
         setPiezaActual(nueva)
     }
@@ -123,7 +133,6 @@ export default function VistaJuego() {
                     return eliminarFilasCompletas(nuevoTablero)    
                 })
                 setTimeout(() => {insertaNuevaPieza()}, 100)
-                setMostrarBotonGuardar(true) 
                 return piezaAnterior
             } else {
                 setPuntuacion(puntuacion => puntuacion + 10)
