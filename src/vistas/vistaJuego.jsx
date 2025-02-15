@@ -18,6 +18,7 @@ export default function VistaJuego() {
     const [puntuacion, setPuntuacion] = useState(0)
     const [mostrarBotonGuardar, setMostrarBotonGuardar] = useState(false)
     const [redirigir, setRedirigir] = useState(false) 
+    const [lineasEliminadas, setLineasEliminadas] = useState(0)
     const { registraPartida } = useContext(PartidasContext)
     const navigate = useNavigate() 
 
@@ -95,13 +96,32 @@ export default function VistaJuego() {
         })
     }
     
+    const eliminarFilasCompletas = (tablero) => {
+        const nuevasFilas = tablero.slice(0, -1).filter(fila => fila.some(celda => celda === 0))
+        const filasEliminadas = tablero.length - 1 - nuevasFilas.length
+        const filasVacias = Array.from({ length: filasEliminadas }, () => Array(tablero[0].length).fill(0))
+        
+        for (let i = 0; i < filasVacias.length; i++) {
+            filasVacias[i][0] = 1 
+            filasVacias[i][filasVacias[i].length - 1] = 1
+        }
+    
+        const ultimaFilaOriginal = tablero[tablero.length - 1]
+    
+        setLineasEliminadas(prev => prev + filasEliminadas) 
+        return [...filasVacias, ...nuevasFilas, ultimaFilaOriginal]
+    }
+
     const bajar = () => {
         console.log("Bajar pieza")
         setPiezaActual((piezaAnterior) => {
             const nuevaFila = piezaAnterior.fila + 1
             if (hayColision(piezaAnterior, nuevaFila, piezaAnterior.columna)) {
                 setPuntuacion(puntuacion => puntuacion + 50)
-                setArrayCasillas((prevArray) => pintarPieza(prevArray, piezaAnterior))
+                setArrayCasillas((prevArray) => {
+                    const nuevoTablero = pintarPieza(prevArray, piezaAnterior)
+                    return eliminarFilasCompletas(nuevoTablero)    
+                })
                 setTimeout(() => {insertaNuevaPieza()}, 100)
                 setMostrarBotonGuardar(true) 
                 return piezaAnterior
@@ -111,8 +131,6 @@ export default function VistaJuego() {
             }
         })
     }
-    
-
     
     const girar = () => {
         console.log("Girar pieza")
@@ -135,6 +153,7 @@ export default function VistaJuego() {
             return piezaAnterior
         })
     }
+
     const controlTeclas = (event) => {
         switch (event.key) {
             case "ArrowRight":
@@ -167,7 +186,7 @@ export default function VistaJuego() {
             intervalIdRef.current = id
         }
     }
-
+    
     const jugar = () => {
         insertaNuevaPieza()
         iniciarMovimiento()
@@ -196,8 +215,8 @@ export default function VistaJuego() {
             <div className="row">
                 <div className="col-4 d-flex flex-column justify-content-end align-items-center p-5">
                     <h4>Nivel: <span>2</span></h4>
-                    <h4>Tiempo: <span>5:22</span></h4>
-                    <h4>Lineas: <span>2</span></h4>
+                    <h4>Tiempo: <span>0</span></h4>
+                    <h4>Lineas: <span>{lineasEliminadas}</span></h4>
                     <h4>Puntos: <span>{puntuacion}</span></h4>
                 </div>
                 <div className="col-4 d-flex justify-content-center">
@@ -223,14 +242,7 @@ export default function VistaJuego() {
                         <h4>Pieza guardada:</h4>
                         <div className="piezaGuardada">
                             <div className="piezaSiguiente2 m-2">
-                                <div className="fila d-flex justify-content-center">
-                                    <div className="celda bg-warning bg-gradient border-dark"></div>
-                                    <div className="celda bg-warning border-secondary"></div>
-                                </div>
-                                <div className="fila d-flex justify-content-center">
-                                    <div className="celda bg-warning bg-gradient border-dark"></div>
-                                    <div className="celda bg-warning border-secondary"></div>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
