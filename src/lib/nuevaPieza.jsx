@@ -1,6 +1,6 @@
 import ModeloPieza from './modeloPieza'
 
-export default function nuevaPieza(modelos) {
+export default function nuevaPieza(modelos) { 
     const numero = Math.floor(Math.random() * modelos.length)
 
     if (!modelos[numero]) {
