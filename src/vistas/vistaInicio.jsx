@@ -11,7 +11,7 @@ export default function VistaInicio() {
                 <h2>Instrucciones:</h2>
                 <p>Puedes mover las piezas utilizando las flechas izquierda y derecha</p>
                 <p>Con la flecha hacia abajo puedes girar la pieza</p>
-                <p><strong>Ñ</strong> para cambiar la pieza actual por la pieza que está a punto de salir (que puedes ver en la columna de la derecha)</p>
+                <p><strong>G</strong> para cambiar la pieza actual por la pieza que está a punto de salir (que puedes ver en la columna de la derecha)</p>
                 <p>Al final de la partida podrás guardar tu puntuación y ver el ranking de jugadores</p>
                 <button id="btnJuegos" className="btn btn-success fs-1 mt-5 "><Link className='text-decoration-none text-white' to="/juego">JUGAR</Link></button>
                 <hr />
